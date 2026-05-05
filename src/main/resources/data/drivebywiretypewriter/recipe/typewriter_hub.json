@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "drivebywire:controller_hub"},
+    {"item": "simulated:linked_typewriter"}
+  ],
+  "result": {
+    "id": "drivebywiretypewriter:typewriter_hub",
+    "count": 1
+  }
+}

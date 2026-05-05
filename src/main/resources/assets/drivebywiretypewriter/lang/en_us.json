@@ -1,13 +1,4 @@
 {
-  "itemGroup.drivebywiretypewriter": "Example Mod Tab",
-  "block.drivebywiretypewriter.example_block": "Example Block",
-  "item.drivebywiretypewriter.example_item": "Example Item",
-
-  "drivebywiretypewriter.configuration.title": "Drive By Wire - Typewriter Configs",
-  "drivebywiretypewriter.configuration.section.drivebywiretypewriter.common.toml": "Drive By Wire - Typewriter Configs",
-  "drivebywiretypewriter.configuration.section.drivebywiretypewriter.common.toml.title": "Drive By Wire - Typewriter Configs",
-  "drivebywiretypewriter.configuration.items": "Item List",
-  "drivebywiretypewriter.configuration.logDirtBlock": "Log Dirt Block",
-  "drivebywiretypewriter.configuration.magicNumberIntroduction": "Magic Number Text",
-  "drivebywiretypewriter.configuration.magicNumber": "Magic Number"
+  "block.drivebywiretypewriter.typewriter_hub": "Typewriter Hub",
+  "itemGroup.drivebywiretypewriter": "Drive By Wire Typewriter"
 }

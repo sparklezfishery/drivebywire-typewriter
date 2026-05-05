@@ -1,0 +1,6 @@
+{
+	"parent": "drivebywiretypewriter:block/typewriter_hub/block",
+	"textures": {
+		"1": "simulated:block/linked_typewriter/linked_typewriter_powered"
+	}
+}
