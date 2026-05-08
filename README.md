@@ -45,6 +45,14 @@ Each channel is active (`1`) while the key is held and inactive (`0`) when relea
 ![Turn A](./docs/turnA.png)
 ![Turn D](./docs/turnD.png)
 
+## About This Project
+
+This project was developed **almost entirely** by **ClaudeCode** (Anthropic's AI assistant). It was built iteratively on
+top of the official [NeoForge mod project template(mod-generator)](https://neoforged.net/mod-generator/).
+
+Beyond the initial template setup, all code contributions, feature implementations, refactors, and bug fixes were
+autonomously generated and refined by ClaudeCode in a collaborative loop.
+
 ## License
 
-All Rights Reserved — © SparklezFish
+This project is licensed under the **MIT License** – see the [LICENSE](LICENSE.txt) file for details.
