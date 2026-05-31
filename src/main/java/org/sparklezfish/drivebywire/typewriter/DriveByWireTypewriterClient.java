@@ -5,7 +5,6 @@ import dev.simulated_team.simulated.content.blocks.redstone.linked_typewriter.Li
 import dev.simulated_team.simulated.content.blocks.redstone.linked_typewriter.LinkedTypewriterRenderer;
 import dev.simulated_team.simulated.mixin_interface.PlayerTypewriterExtension;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.core.BlockPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModContainer;
@@ -20,19 +19,16 @@ import org.sparklezfish.drivebywire.typewriter.blocks.TypewriterHubBlockEntity;
 import org.sparklezfish.drivebywire.typewriter.network.TypewriterHubDisconnectPacket;
 import org.sparklezfish.drivebywire.typewriter.network.TypewriterHubKeyPacket;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 @Mod(value = DriveByWireTypewriterMod.MODID, dist = Dist.CLIENT)
 public class DriveByWireTypewriterClient {
 
     private static final Set<Integer> heldKeys = new HashSet<>();
-    private static final Map<Integer, String> heldChannels = new HashMap<>();
     private static boolean prevWindowActive = true;
     private static boolean wasConnected = false;
-    private static String lastLoggedKeyboardProfile = "";
+//    private static String lastLoggedKeyboardProfile = "";
 
     public DriveByWireTypewriterClient(ModContainer container) {
         NeoForge.EVENT_BUS.addListener(DriveByWireTypewriterClient::onKeyInput);
@@ -45,8 +41,8 @@ public class DriveByWireTypewriterClient {
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(
-                DriveByWireTypewriterMod.TYPEWRITER_HUB_BLOCK_ENTITY.get(),
-                LinkedTypewriterRenderer::new
+            DriveByWireTypewriterMod.TYPEWRITER_HUB_BLOCK_ENTITY.get(),
+            LinkedTypewriterRenderer::new
         );
     }
 
@@ -66,11 +62,11 @@ public class DriveByWireTypewriterClient {
         var pos = ((PlayerTypewriterExtension) player).simulated$getCurrentTypewriter();
         var be = pos != null ? mc.level.getBlockEntity(pos) : null;
         boolean nowConnected = be instanceof LinkedTypewriterBlockEntity ltbe && ltbe.powered
-                && be instanceof TypewriterHubBlockEntity;
+                               && be instanceof TypewriterHubBlockEntity;
 
-        if (nowConnected && !wasConnected) {
-            logKeyboardProfile();
-        }
+//        if (nowConnected && !wasConnected) {
+//            logKeyboardProfile();
+//        }
 
         boolean disconnected = wasConnected && !nowConnected;
         wasConnected = nowConnected;
@@ -85,7 +81,6 @@ public class DriveByWireTypewriterClient {
         } else if ((lostFocus || disconnected) && !heldKeys.isEmpty()) {
             // Focus lost while not connected, or server kicked us — clean up local key state only
             heldKeys.clear();
-            heldChannels.clear();
             LinkedTypewriterInteractionHandler.getPressedKeys().clear();
         }
     }
@@ -93,13 +88,12 @@ public class DriveByWireTypewriterClient {
     private static void releaseAllHeld(BlockPos typewriterPos, BlockPos validPos) {
         var mc = Minecraft.getInstance();
         if (validPos != null) {
-            for (String channel : heldChannels.values()) {
-                PacketDistributor.sendToServer(new TypewriterHubKeyPacket(validPos, channel, false));
+            for (int key : heldKeys) {
+                PacketDistributor.sendToServer(new TypewriterHubKeyPacket(validPos, key, false));
             }
             PacketDistributor.sendToServer(new TypewriterHubDisconnectPacket(validPos));
         }
         heldKeys.clear();
-        heldChannels.clear();
         LinkedTypewriterInteractionHandler.getPressedKeys().clear();
         var player = mc.player;
         if (player != null) {
@@ -120,25 +114,22 @@ public class DriveByWireTypewriterClient {
 
         var be = mc.level.getBlockEntity(typewriterPos);
         if (!(be instanceof TypewriterHubBlockEntity hub)) return;
-        if (!((LinkedTypewriterBlockEntity) hub).powered) return;
+        if (!hub.powered) return;
 
-        String channel = resolveChannel(event.getKey(), event.getScanCode());
-        if (channel == null) return;
+        DriveByWireTypewriterMod.LOGGER.info(String.valueOf(event.getKey()));
+
+        if (!TypewriterChannels.DISPLAY_MAP.containsKey(event.getKey())) return;
 
         // Suppress vanilla key bindings (e.g. E→inventory, Q→drop, Ctrl→sprint).
         // InputEvent.Key fires after Minecraft increments click counts, so consumeClick()
         // here clears those counts before the game loop reads them.
         LinkedTypewriterInteractionHandler.preventPress(event.getKey(), event.getScanCode());
-        suppressAllKeyBindings(event.getKey(), event.getScanCode());
 
         // Track held keys so the tick handler can release them on disconnect/focus-loss
-        int inputId = inputId(event.getKey(), event.getScanCode());
         if (event.getAction() == GLFW.GLFW_PRESS) {
             heldKeys.add(event.getKey());
-            heldChannels.put(inputId, channel);
         } else {
             heldKeys.remove(event.getKey());
-            heldChannels.remove(inputId);
         }
 
         // Update key animation using the same index mapping as LinkedTypewriterInteractionHandler
@@ -151,57 +142,29 @@ public class DriveByWireTypewriterClient {
         }
 
         PacketDistributor.sendToServer(new TypewriterHubKeyPacket(
-                typewriterPos,
-                channel,
-                event.getAction() == GLFW.GLFW_PRESS
+            typewriterPos,
+            event.getKey(),
+            event.getAction() == GLFW.GLFW_PRESS
         ));
     }
 
-    private static String resolveChannel(int key, int scanCode) {
-        String keyName = GLFW.glfwGetKeyName(key, scanCode);
-        String channel = TypewriterChannels.channelForCharacter(keyName);
-        if (channel != null)
-            return channel;
-        return TypewriterChannels.channelForCode(key);
-    }
+//    private static void logKeyboardProfile() {
+//        String profile = detectKeyboardProfile();
+//        if (profile.equals(lastLoggedKeyboardProfile))
+//            return;
+//        lastLoggedKeyboardProfile = profile;
+//        DriveByWireTypewriterMod.LOGGER.info("Typewriter keyboard layout detected as {}.", profile);
+//    }
 
-    private static int inputId(int key, int scanCode) {
-        return key != GLFW.GLFW_KEY_UNKNOWN ? key : scanCode | 0x10000;
-    }
-
-    private static void suppressAllKeyBindings(int key, int scanCode) {
-        var mc = Minecraft.getInstance();
-        if (mc.options == null)
-            return;
-
-        for (KeyMapping mapping : mc.options.keyMappings) {
-            if (!mapping.matches(key, scanCode))
-                continue;
-
-            while (mapping.consumeClick()) {
-                // Drain queued clicks added before this input event reached us.
-            }
-            mapping.setDown(false);
-        }
-    }
-
-    private static void logKeyboardProfile() {
-        String profile = detectKeyboardProfile();
-        if (profile.equals(lastLoggedKeyboardProfile))
-            return;
-        lastLoggedKeyboardProfile = profile;
-        DriveByWireTypewriterMod.LOGGER.info("Typewriter keyboard layout detected as {}.", profile);
-    }
-
-    private static String detectKeyboardProfile() {
-        for (int key = GLFW.GLFW_KEY_SPACE; key <= GLFW.GLFW_KEY_MENU; key++) {
-            int scanCode = GLFW.glfwGetKeyScancode(key);
-            String keyName = GLFW.glfwGetKeyName(key, scanCode);
-            if (keyName != null && TypewriterChannels.isHungarianCharacter(keyName))
-                return "Hungarian-compatible";
-        }
-        return "English-compatible";
-    }
+//    private static String detectKeyboardProfile() {
+//        for (int key = GLFW.GLFW_KEY_SPACE; key <= GLFW.GLFW_KEY_MENU; key++) {
+//            int scanCode = GLFW.glfwGetKeyScancode(key);
+//            String keyName = GLFW.glfwGetKeyName(key, scanCode);
+//            if (TypewriterChannels.isHungarianCharacter(keyName))
+//                return "Hungarian-compatible";
+//        }
+//        return "English-compatible";
+//    }
 
     private static int animIndex(int key) {
         // Matches LinkedTypewriterInteractionHandler's presetKeys map exactly.

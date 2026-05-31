@@ -91,7 +91,7 @@ public class DriveByWireTypewriterMod {
     private void commonSetup(FMLCommonSetupEvent event) {
         LOGGER.info(
             "Drive By Wire Typewriter bridge loaded — {} channels registered.",
-            TypewriterChannels.CHANNELS.size()
+            TypewriterChannels.ALL_CHANNEL_DISPLAYS.size()
         );
     }
 }

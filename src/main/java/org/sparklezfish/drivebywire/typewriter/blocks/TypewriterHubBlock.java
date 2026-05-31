@@ -9,6 +9,7 @@ import org.sparklezfish.drivebywire.typewriter.DriveByWireTypewriterMod;
 import org.sparklezfish.drivebywire.typewriter.TypewriterChannels;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -43,12 +44,12 @@ public class TypewriterHubBlock extends LinkedTypewriterBlock implements MultiCh
 
     @Override
     public List<String> wire$getChannels() {
-        return TypewriterChannels.CHANNELS;
+        return TypewriterChannels.ALL_CHANNEL_DISPLAYS.stream().map(Component::getString).toList();
     }
 
     @Override
     public String wire$nextChannel(String current, boolean forward) {
-        List<String> ch = TypewriterChannels.CHANNELS;
+        List<String> ch = wire$getChannels();
         int idx = ch.indexOf(current);
         if (idx == -1) return ch.getFirst();
         return ch.get(Math.floorMod(idx + (forward ? 1 : -1), ch.size()));

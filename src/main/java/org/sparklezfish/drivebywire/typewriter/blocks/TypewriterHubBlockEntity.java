@@ -8,6 +8,7 @@ import org.sparklezfish.drivebywire.typewriter.DriveByWireTypewriterMod;
 import org.sparklezfish.drivebywire.typewriter.TypewriterChannels;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -27,8 +28,8 @@ public class TypewriterHubBlockEntity extends LinkedTypewriterBlockEntity {
     public void disconnectUser() {
         var level = getLevel();
         if (level != null && !level.isClientSide) {
-            for (String channel : TypewriterChannels.CHANNELS) {
-                WireNetworkManager.trySetSignalAt(level, getBlockPos(), channel, 0);
+            for (Component d : TypewriterChannels.ALL_CHANNEL_DISPLAYS) {
+                WireNetworkManager.trySetSignalAt(level, getBlockPos(), d.getString(), 0);
             }
         }
         super.disconnectUser();
@@ -53,10 +54,10 @@ public class TypewriterHubBlockEntity extends LinkedTypewriterBlockEntity {
         var level = this.getLevel();
         if (level == null || level.isClientSide) return;
 
-        String channel = TypewriterChannels.CODE_MAP.get(key);
+        var channel = TypewriterChannels.DISPLAY_MAP.get(key);
 
         if (channel == null) return;
 
-        WireNetworkManager.trySetSignalAt(level, this.getBlockPos(), channel, press ? 15 : 0);
+        WireNetworkManager.trySetSignalAt(level, this.getBlockPos(), channel.getString(), press ? 15 : 0);
     }
 }

@@ -13,22 +13,22 @@ import org.sparklezfish.drivebywire.typewriter.DriveByWireTypewriterMod;
 import org.sparklezfish.drivebywire.typewriter.TypewriterChannels;
 import org.sparklezfish.drivebywire.typewriter.blocks.TypewriterHubBlockEntity;
 
-public record TypewriterHubKeyPacket(BlockPos pos, String channel, boolean press)
-        implements CustomPacketPayload {
+public record TypewriterHubKeyPacket(BlockPos pos, int key, boolean press)
+    implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<TypewriterHubKeyPacket> TYPE =
         new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(
             DriveByWireTypewriterMod.MODID, "key_input"));
 
     public static final StreamCodec<FriendlyByteBuf, TypewriterHubKeyPacket> CODEC =
-            StreamCodec.of(
-                    (buf, pkt) -> {
-                        buf.writeBlockPos(pkt.pos);
-                        buf.writeUtf(pkt.channel);
-                        buf.writeBoolean(pkt.press);
-                    },
-                    buf -> new TypewriterHubKeyPacket(buf.readBlockPos(), buf.readUtf(), buf.readBoolean())
-            );
+        StreamCodec.of(
+            (buf, pkt) -> {
+                buf.writeBlockPos(pkt.pos);
+                buf.writeVarInt(pkt.key);
+                buf.writeBoolean(pkt.press);
+            },
+            buf -> new TypewriterHubKeyPacket(buf.readBlockPos(), buf.readVarInt(), buf.readBoolean())
+        );
 
     @Override
     public CustomPacketPayload.@NotNull Type<? extends CustomPacketPayload> type() {
@@ -42,8 +42,9 @@ public record TypewriterHubKeyPacket(BlockPos pos, String channel, boolean press
             var be = level.getBlockEntity(pos);
             if (!(be instanceof TypewriterHubBlockEntity hub)) return;
             if (!hub.checkUser(player.getUUID())) return;
-            if (!TypewriterChannels.isKnownChannel(channel)) return;
-            WireNetworkManager.trySetSignalAt(level, pos, channel, press ? 15 : 0);
+            var channel = TypewriterChannels.DISPLAY_MAP.get(key);
+            if (channel == null) return;
+            WireNetworkManager.trySetSignalAt(level, pos, channel.getString(), press ? 15 : 0);
         });
     }
 }
