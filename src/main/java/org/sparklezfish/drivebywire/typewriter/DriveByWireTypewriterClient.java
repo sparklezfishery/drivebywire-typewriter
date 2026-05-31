@@ -116,8 +116,6 @@ public class DriveByWireTypewriterClient {
         if (!(be instanceof TypewriterHubBlockEntity hub)) return;
         if (!hub.powered) return;
 
-        DriveByWireTypewriterMod.LOGGER.info(String.valueOf(event.getKey()));
-
         if (!TypewriterChannels.DISPLAY_MAP.containsKey(event.getKey())) return;
 
         // Suppress vanilla key bindings (e.g. E→inventory, Q→drop, Ctrl→sprint).
