@@ -84,8 +84,8 @@ tasks.named('compileJava').configure { dependsOn('extractNestedJars') }
 
 dependencies {
     // Drive By Wire
-    compileOnly files('lib/drivebywire-0.2.9.jar')
-    localRuntime files('lib/drivebywire-0.2.9.jar')
+    compileOnly files('lib/drivebywire-0.2.7.jar')
+    localRuntime files('lib/drivebywire-0.2.7.jar')
 
     // Create (nested JARs like Ponder also extracted)
     extractedDeps files('lib/create-1.21.1-6.0.10.jar')
