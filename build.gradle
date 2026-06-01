@@ -84,8 +84,8 @@ tasks.named('compileJava').configure { dependsOn('extractNestedJars') }
 
 dependencies {
     // Drive By Wire
-    compileOnly files('lib/drivebywire-0.2.7.jar')
-    localRuntime files('lib/drivebywire-0.2.7.jar')
+    compileOnly files('lib/drivebywire-0.2.9.jar')
+    localRuntime files('lib/drivebywire-0.2.9.jar')
 
     // Create (nested JARs like Ponder also extracted)
     extractedDeps files('lib/create-1.21.1-6.0.10.jar')
@@ -98,7 +98,7 @@ dependencies {
     compileOnly fileTree(dir: extractedJarsDir, include: '*.jar')
     localRuntime files("lib/create-aeronautics-bundled-1.21.1-1.1.3.jar")
 
-    localRuntime files('../runtime/sable-neoforge-1.21.1-1.1.3.jar')
+    localRuntime files('lib/sable-neoforge-1.21.1-1.2.2.jar')
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
