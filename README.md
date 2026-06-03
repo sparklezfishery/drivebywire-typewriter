@@ -31,7 +31,7 @@ Each channel is active (`1`) while the key is held and inactive (`0`) when relea
 |-----|---------|
 | NeoForge | 21.1.228+ |
 | Simulated (Create: Simulated) | 1.1.3+ |
-| Drive By Wire | 0.2.7+ |
+| Drive By Wire | 0.2.9+ |
 | Create | 6.0.10+ |
 
 ## Usage
