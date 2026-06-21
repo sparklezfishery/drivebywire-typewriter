@@ -99,6 +99,7 @@ dependencies {
     localRuntime files("lib/create-aeronautics-bundled-1.21.1-1.1.3.jar")
 
     localRuntime files('lib/sable-neoforge-1.21.1-1.2.2.jar')
+    localRuntime fileTree(dir: '../runtime', include: '*.jar')
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

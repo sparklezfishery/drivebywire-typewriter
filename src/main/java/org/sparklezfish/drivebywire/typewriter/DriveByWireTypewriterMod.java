@@ -75,7 +75,7 @@ public class DriveByWireTypewriterMod {
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
-        var registrar = event.registrar("1");
+        var registrar = event.registrar("2");
         registrar.playToServer(
             TypewriterHubKeyPacket.TYPE,
             TypewriterHubKeyPacket.CODEC,

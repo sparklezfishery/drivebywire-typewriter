@@ -2,15 +2,54 @@ package org.sparklezfish.drivebywire.typewriter;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+
+import org.lwjgl.glfw.GLFW;
 
 public final class TypewriterChannels {
 
+    private static final Set<String> HUNGARIAN_KEY_NAMES =
+        Set.of("á", "é", "í", "ó", "ö", "ő", "ú", "ü", "ű");
     private static final LinkedHashMap<Integer, String> CODE_TO_CHANNEL = new LinkedHashMap<>();
+    private static final LinkedHashMap<String, String> PRINTABLE_TO_CHANNEL = new LinkedHashMap<>();
 
     static {
-        // Letters A-Z (GLFW codes match ASCII uppercase: 65-90)
+        // GLFW key names use the active keyboard layout, unlike the key codes below.
+        // This lets the same physical keys expose the characters printed by Hungarian
+        // and other layouts instead of always pretending the keyboard is US English.
+        for (char c = 'a'; c <= 'z'; c++) {
+            addPrintable(String.valueOf(c), String.valueOf(c));
+        }
+        for (char c = '0'; c <= '9'; c++) {
+            addPrintable(String.valueOf(c), String.valueOf(c));
+        }
+        addPrintable(" ", "space");
+        addPrintable("'", "apostrophe");
+        addPrintable(",", "comma");
+        addPrintable("-", "minus");
+        addPrintable(".", "period");
+        addPrintable("/", "slash");
+        addPrintable(";", "semicolon");
+        addPrintable("=", "equals");
+        addPrintable("[", "left_bracket");
+        addPrintable("\\", "backslash");
+        addPrintable("]", "right_bracket");
+
+        addPrintable("á", "a_acute");
+        addPrintable("é", "e_acute");
+        addPrintable("í", "i_acute");
+        addPrintable("ó", "o_acute");
+        addPrintable("ö", "o_diaeresis");
+        addPrintable("ő", "o_double_acute");
+        addPrintable("ú", "u_acute");
+        addPrintable("ü", "u_diaeresis");
+        addPrintable("ű", "u_double_acute");
+
+        // Fallbacks for non-printable keys and platforms where GLFW has no key name.
         for (int c = 65; c <= 90; c++) {
             char ch = (char) c;
             CODE_TO_CHANNEL.put(c, "drivebywiretypewriter.key." + Character.toLowerCase(ch));
@@ -60,9 +99,47 @@ public final class TypewriterChannels {
         CODE_TO_CHANNEL.put(348, "drivebywiretypewriter.key.menu");
     }
 
-    public static final List<String> CHANNELS = List.copyOf(CODE_TO_CHANNEL.values());
+    public static final List<String> CHANNELS;
+    private static final List<String> STANDARD_CHANNELS;
+    private static final Set<String> VALID_CHANNELS;
 
     public static final Map<Integer, String> CODE_MAP = Collections.unmodifiableMap(CODE_TO_CHANNEL);
+
+    static {
+        var standardChannels = new LinkedHashSet<>(CODE_TO_CHANNEL.values());
+        STANDARD_CHANNELS = List.copyOf(standardChannels);
+
+        var allChannels = new LinkedHashSet<>(standardChannels);
+        allChannels.addAll(PRINTABLE_TO_CHANNEL.values());
+        CHANNELS = List.copyOf(allChannels);
+        VALID_CHANNELS = Set.copyOf(allChannels);
+    }
+
+    private static void addPrintable(String keyName, String channelName) {
+        PRINTABLE_TO_CHANNEL.put(keyName, "drivebywiretypewriter.key." + channelName);
+    }
+
+    public static String resolve(int keyCode, String glfwKeyName) {
+        if (glfwKeyName != null) {
+            String channel = PRINTABLE_TO_CHANNEL.get(glfwKeyName.toLowerCase(Locale.ROOT));
+            if (channel != null) return channel;
+        }
+        return CODE_TO_CHANNEL.get(keyCode);
+    }
+
+    public static boolean isValid(String channel) {
+        return VALID_CHANNELS.contains(channel);
+    }
+
+    public static List<String> channelsForCurrentKeyboardLayout() {
+        for (int key = GLFW.GLFW_KEY_SPACE; key <= GLFW.GLFW_KEY_MENU; key++) {
+            String keyName = GLFW.glfwGetKeyName(key, GLFW.glfwGetKeyScancode(key));
+            if (keyName != null && HUNGARIAN_KEY_NAMES.contains(keyName.toLowerCase(Locale.ROOT))) {
+                return CHANNELS;
+            }
+        }
+        return STANDARD_CHANNELS;
+    }
 
     private TypewriterChannels() {
     }
