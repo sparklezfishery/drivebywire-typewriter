@@ -25,14 +25,6 @@ The hub exposes a channel for every key:
 - Modifiers: Shift, Ctrl, Alt, Super, Menu
 
 Each channel is active (`1`) while the key is held and inactive (`0`) when released. Only one player can use a hub at a time; disconnecting or losing window focus resets all channels.
-Printable keys follow the client's active keyboard layout; their channel names remain stable ASCII identifiers such as
-`drivebywiretypewriter.key.o_double_acute`.
-Hungarian channels are included in the wire tool's channel cycle only while a Hungarian-compatible keyboard layout is active.
-
-For physical-key testing, open [`docs/hungarian-keyboard-tester.html`](./docs/hungarian-keyboard-tester.html)
-in Chrome or Edge. It displays the Hungarian layout and highlights keys as they are pressed.
-To keep visualizing keys while Minecraft has focus, run the Windows
-[`tools/HungarianKeyboardDebug`](./tools/HungarianKeyboardDebug) desktop overlay.
 
 ## Requirements
 
@@ -65,3 +57,10 @@ autonomously generated and refined by ClaudeCode in a collaborative loop.
 ## License
 
 This project is licensed under the **MIT License** – see the [LICENSE](LICENSE.txt) file for details.
+
+---
+
+## Development tools
+
+To visualize global keyboard input while Minecraft has focus, run the Windows
+[`tools/HungarianKeyboardDebug`](./tools/HungarianKeyboardDebug) desktop overlay.
