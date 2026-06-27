@@ -12,10 +12,9 @@ import org.lwjgl.glfw.GLFW;
 
 public final class TypewriterChannels {
 
-    private static final Set<String> HUNGARIAN_KEY_NAMES =
-        Set.of("á", "é", "í", "ó", "ö", "ő", "ú", "ü", "ű");
     private static final LinkedHashMap<Integer, String> CODE_TO_CHANNEL = new LinkedHashMap<>();
     private static final LinkedHashMap<String, String> PRINTABLE_TO_CHANNEL = new LinkedHashMap<>();
+    private static final LinkedHashSet<String> NON_PRINTABLE_CHANNELS = new LinkedHashSet<>();
 
     static {
         // GLFW key names use the active keyboard layout, unlike the key codes below.
@@ -73,34 +72,35 @@ public final class TypewriterChannels {
         CODE_TO_CHANNEL.put(92,  "drivebywiretypewriter.key.backslash");
         CODE_TO_CHANNEL.put(93,  "drivebywiretypewriter.key.right_bracket");
         // Control keys
-        CODE_TO_CHANNEL.put(257, "drivebywiretypewriter.key.enter");
-        CODE_TO_CHANNEL.put(258, "drivebywiretypewriter.key.tab");
-        CODE_TO_CHANNEL.put(259, "drivebywiretypewriter.key.backspace");
-        CODE_TO_CHANNEL.put(261, "drivebywiretypewriter.key.delete");
-        CODE_TO_CHANNEL.put(280, "drivebywiretypewriter.key.caps_lock");
+        addNonPrintable(257, "enter");
+        addNonPrintable(258, "tab");
+        addNonPrintable(259, "backspace");
+        addNonPrintable(261, "delete");
+        addNonPrintable(280, "caps_lock");
 
         // Navigation
-        CODE_TO_CHANNEL.put(262, "drivebywiretypewriter.key.right");
-        CODE_TO_CHANNEL.put(263, "drivebywiretypewriter.key.left");
-        CODE_TO_CHANNEL.put(264, "drivebywiretypewriter.key.down");
-        CODE_TO_CHANNEL.put(265, "drivebywiretypewriter.key.up");
-        CODE_TO_CHANNEL.put(266, "drivebywiretypewriter.key.page_up");
-        CODE_TO_CHANNEL.put(267, "drivebywiretypewriter.key.page_down");
-        CODE_TO_CHANNEL.put(269, "drivebywiretypewriter.key.end");
+        addNonPrintable(262, "right");
+        addNonPrintable(263, "left");
+        addNonPrintable(264, "down");
+        addNonPrintable(265, "up");
+        addNonPrintable(266, "page_up");
+        addNonPrintable(267, "page_down");
+        addNonPrintable(269, "end");
 
         // Modifiers
-        CODE_TO_CHANNEL.put(340, "drivebywiretypewriter.key.left_shift");
-        CODE_TO_CHANNEL.put(341, "drivebywiretypewriter.key.left_ctrl");
-        CODE_TO_CHANNEL.put(342, "drivebywiretypewriter.key.left_alt");
-        CODE_TO_CHANNEL.put(343, "drivebywiretypewriter.key.left_super");
-        CODE_TO_CHANNEL.put(344, "drivebywiretypewriter.key.right_shift");
-        CODE_TO_CHANNEL.put(345, "drivebywiretypewriter.key.right_ctrl");
-        CODE_TO_CHANNEL.put(346, "drivebywiretypewriter.key.right_alt");
-        CODE_TO_CHANNEL.put(348, "drivebywiretypewriter.key.menu");
+        addNonPrintable(340, "left_shift");
+        addNonPrintable(341, "left_ctrl");
+        addNonPrintable(342, "left_alt");
+        addNonPrintable(343, "left_super");
+        addNonPrintable(344, "right_shift");
+        addNonPrintable(345, "right_ctrl");
+        addNonPrintable(346, "right_alt");
+        addNonPrintable(348, "menu");
     }
 
     public static final List<String> CHANNELS;
     private static final List<String> STANDARD_CHANNELS;
+    private static final Set<String> STANDARD_CHANNEL_SET;
     private static final Set<String> VALID_CHANNELS;
 
     public static final Map<Integer, String> CODE_MAP = Collections.unmodifiableMap(CODE_TO_CHANNEL);
@@ -108,6 +108,7 @@ public final class TypewriterChannels {
     static {
         var standardChannels = new LinkedHashSet<>(CODE_TO_CHANNEL.values());
         STANDARD_CHANNELS = List.copyOf(standardChannels);
+        STANDARD_CHANNEL_SET = Set.copyOf(standardChannels);
 
         var allChannels = new LinkedHashSet<>(standardChannels);
         allChannels.addAll(PRINTABLE_TO_CHANNEL.values());
@@ -117,6 +118,12 @@ public final class TypewriterChannels {
 
     private static void addPrintable(String keyName, String channelName) {
         PRINTABLE_TO_CHANNEL.put(keyName, "drivebywiretypewriter.key." + channelName);
+    }
+
+    private static void addNonPrintable(int keyCode, String channelName) {
+        String channel = "drivebywiretypewriter.key." + channelName;
+        CODE_TO_CHANNEL.put(keyCode, channel);
+        NON_PRINTABLE_CHANNELS.add(channel);
     }
 
     public static String resolve(int keyCode, String glfwKeyName) {
@@ -132,13 +139,29 @@ public final class TypewriterChannels {
     }
 
     public static List<String> channelsForCurrentKeyboardLayout() {
+        LinkedHashSet<String> layoutChannels = new LinkedHashSet<>();
+        boolean hasLayoutSpecificKey = false;
+
         for (int key = GLFW.GLFW_KEY_SPACE; key <= GLFW.GLFW_KEY_MENU; key++) {
             String keyName = GLFW.glfwGetKeyName(key, GLFW.glfwGetKeyScancode(key));
-            if (keyName != null && HUNGARIAN_KEY_NAMES.contains(keyName.toLowerCase(Locale.ROOT))) {
-                return CHANNELS;
+            if (keyName == null) continue;
+
+            String normalized = keyName.toLowerCase(Locale.ROOT);
+            String channel = PRINTABLE_TO_CHANNEL.get(normalized);
+            if (channel != null) {
+                layoutChannels.add(channel);
+                if (!STANDARD_CHANNEL_SET.contains(channel)) {
+                    hasLayoutSpecificKey = true;
+                }
             }
         }
-        return STANDARD_CHANNELS;
+
+        if (!hasLayoutSpecificKey) {
+            return STANDARD_CHANNELS;
+        }
+
+        layoutChannels.addAll(NON_PRINTABLE_CHANNELS);
+        return CHANNELS.stream().filter(layoutChannels::contains).toList();
     }
 
     private TypewriterChannels() {
