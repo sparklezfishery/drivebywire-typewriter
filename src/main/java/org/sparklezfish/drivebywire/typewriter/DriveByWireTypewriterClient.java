@@ -5,7 +5,9 @@ import dev.simulated_team.simulated.content.blocks.redstone.linked_typewriter.Li
 import dev.simulated_team.simulated.content.blocks.redstone.linked_typewriter.LinkedTypewriterRenderer;
 import dev.simulated_team.simulated.mixin_interface.PlayerTypewriterExtension;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.core.BlockPos;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -19,18 +21,18 @@ import org.sparklezfish.drivebywire.typewriter.blocks.TypewriterHubBlockEntity;
 import org.sparklezfish.drivebywire.typewriter.network.TypewriterHubDisconnectPacket;
 import org.sparklezfish.drivebywire.typewriter.network.TypewriterHubKeyPacket;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @Mod(value = DriveByWireTypewriterMod.MODID, dist = Dist.CLIENT)
 public class DriveByWireTypewriterClient {
 
-    private static final Set<Integer> heldKeys = new HashSet<>();
+    private static final Map<Integer, String> heldKeys = new HashMap<>();
     private static boolean prevWindowActive = true;
     private static boolean wasConnected = false;
 
     public DriveByWireTypewriterClient(ModContainer container) {
-        NeoForge.EVENT_BUS.addListener(DriveByWireTypewriterClient::onKeyInput);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, DriveByWireTypewriterClient::onKeyInput);
         NeoForge.EVENT_BUS.addListener(DriveByWireTypewriterClient::onClientTick);
         var modBus = container.getEventBus();
         if (modBus != null) {
@@ -83,8 +85,8 @@ public class DriveByWireTypewriterClient {
     private static void releaseAllHeld(BlockPos typewriterPos, BlockPos validPos) {
         var mc = Minecraft.getInstance();
         if (validPos != null) {
-            for (int key : heldKeys) {
-                PacketDistributor.sendToServer(new TypewriterHubKeyPacket(validPos, key, false));
+            for (String channel : heldKeys.values()) {
+                PacketDistributor.sendToServer(new TypewriterHubKeyPacket(validPos, channel, false));
             }
             PacketDistributor.sendToServer(new TypewriterHubDisconnectPacket(validPos));
         }
@@ -111,16 +113,28 @@ public class DriveByWireTypewriterClient {
         if (!(be instanceof TypewriterHubBlockEntity hub)) return;
         if (!((LinkedTypewriterBlockEntity) hub).powered) return;
 
-        if (!TypewriterChannels.CODE_MAP.containsKey(event.getKey())) return;
+        String channel;
+        if (event.getAction() == GLFW.GLFW_PRESS) {
+            channel = TypewriterChannels.resolve(
+                event.getKey(),
+                GLFW.glfwGetKeyName(event.getKey(), event.getScanCode())
+            );
+        } else {
+            channel = heldKeys.get(event.getKey());
+            if (channel == null) {
+                channel = TypewriterChannels.resolve(
+                    event.getKey(),
+                    GLFW.glfwGetKeyName(event.getKey(), event.getScanCode())
+                );
+            }
+        }
+        if (channel == null) return;
 
-        // Suppress vanilla key bindings (e.g. E→inventory, Q→drop, Ctrl→sprint).
-        // InputEvent.Key fires after Minecraft increments click counts, so consumeClick()
-        // here clears those counts before the game loop reads them.
-        LinkedTypewriterInteractionHandler.preventPress(event.getKey(), event.getScanCode());
+        suppressMatchingKeyMappings(mc, event.getKey(), event.getScanCode());
 
         // Track held keys so the tick handler can release them on disconnect/focus-loss
         if (event.getAction() == GLFW.GLFW_PRESS) {
-            heldKeys.add(event.getKey());
+            heldKeys.put(event.getKey(), channel);
         } else {
             heldKeys.remove(event.getKey());
         }
@@ -136,9 +150,21 @@ public class DriveByWireTypewriterClient {
 
         PacketDistributor.sendToServer(new TypewriterHubKeyPacket(
             typewriterPos,
-            event.getKey(),
+            channel,
             event.getAction() == GLFW.GLFW_PRESS
         ));
+    }
+
+    private static void suppressMatchingKeyMappings(Minecraft mc, int key, int scanCode) {
+        // Simulated's preventPress stops after the first match. A key can be shared by
+        // vanilla, Xaero's maps, and other mods, so every matching mapping must be reset.
+        for (KeyMapping mapping : mc.options.keyMappings) {
+            if (!mapping.matches(key, scanCode)) continue;
+            while (mapping.consumeClick()) {
+                // Drain every queued click, including clicks queued by another mod.
+            }
+            mapping.setDown(false);
+        }
     }
 
     private static int animIndex(int key) {

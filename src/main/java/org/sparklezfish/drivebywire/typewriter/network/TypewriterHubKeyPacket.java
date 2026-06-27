@@ -13,8 +13,10 @@ import org.sparklezfish.drivebywire.typewriter.DriveByWireTypewriterMod;
 import org.sparklezfish.drivebywire.typewriter.TypewriterChannels;
 import org.sparklezfish.drivebywire.typewriter.blocks.TypewriterHubBlockEntity;
 
-public record TypewriterHubKeyPacket(BlockPos pos, int key, boolean press)
+public record TypewriterHubKeyPacket(BlockPos pos, String channel, boolean press)
     implements CustomPacketPayload {
+
+    private static final int MAX_CHANNEL_LENGTH = 64;
 
     public static final CustomPacketPayload.Type<TypewriterHubKeyPacket> TYPE =
         new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(
@@ -24,10 +26,14 @@ public record TypewriterHubKeyPacket(BlockPos pos, int key, boolean press)
         StreamCodec.of(
             (buf, pkt) -> {
                 buf.writeBlockPos(pkt.pos);
-                buf.writeVarInt(pkt.key);
+                buf.writeUtf(pkt.channel, MAX_CHANNEL_LENGTH);
                 buf.writeBoolean(pkt.press);
             },
-            buf -> new TypewriterHubKeyPacket(buf.readBlockPos(), buf.readVarInt(), buf.readBoolean())
+            buf -> new TypewriterHubKeyPacket(
+                buf.readBlockPos(),
+                buf.readUtf(MAX_CHANNEL_LENGTH),
+                buf.readBoolean()
+            )
         );
 
     @Override
@@ -42,8 +48,7 @@ public record TypewriterHubKeyPacket(BlockPos pos, int key, boolean press)
             var be = level.getBlockEntity(pos);
             if (!(be instanceof TypewriterHubBlockEntity hub)) return;
             if (!hub.checkUser(player.getUUID())) return;
-            String channel = TypewriterChannels.CODE_MAP.get(key);
-            if (channel == null) return;
+            if (!TypewriterChannels.isValid(channel)) return;
             WireNetworkManager.trySetSignalAt(level, pos, channel, press ? 15 : 0);
         });
     }

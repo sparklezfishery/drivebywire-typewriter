@@ -19,6 +19,7 @@ The hub exposes a channel for every key:
 - Letters `A`–`Z`
 - Digits `0`–`9`
 - Symbols: Space, `'`, `,`, `-`, `.`, `/`, `;`, `=`, `[`, `]`, `\`
+- Hungarian letters: `á`, `é`, `í`, `ó`, `ö`, `ő`, `ú`, `ü`, `ű` (Channel shows when using a hungarian keyboard layout)
 - Control: Enter, Tab, Backspace, Delete, Caps Lock
 - Navigation: Arrow keys, Page Up/Down, Home, End
 - Modifiers: Shift, Ctrl, Alt, Super, Menu
@@ -47,12 +48,20 @@ Each channel is active (`1`) while the key is held and inactive (`0`) when relea
 
 ## About This Project
 
-This project was developed **almost entirely** by **ClaudeCode** (Anthropic's AI assistant). It was built iteratively on
-top of the official [NeoForge mod project template(mod-generator)](https://neoforged.net/mod-generator/).
+This project was developed with substantial assistance from **Claude Code** (Anthropic) and **Codex** (OpenAI). It was
+built iteratively on top of the official
+[NeoForge mod project template (Mod Generator)](https://neoforged.net/mod-generator/).
 
-Beyond the initial template setup, all code contributions, feature implementations, refactors, and bug fixes were
-autonomously generated and refined by ClaudeCode in a collaborative loop.
+Beyond the initial template setup, the implementation, refactors, bug fixes, documentation, and validation were
+generated and refined through collaborative, human-directed development with these AI coding assistants.
 
 ## License
 
 This project is licensed under the **MIT License** – see the [LICENSE](LICENSE.txt) file for details.
+
+---
+
+## Development tools
+
+To visualize global keyboard input while Minecraft has focus, run the Windows
+[`tools/HungarianKeyboardDebug`](./tools/HungarianKeyboardDebug) desktop overlay.

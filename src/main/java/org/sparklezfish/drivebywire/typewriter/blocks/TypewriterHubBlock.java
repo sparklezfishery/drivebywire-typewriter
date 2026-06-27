@@ -48,7 +48,7 @@ public class TypewriterHubBlock extends LinkedTypewriterBlock implements MultiCh
 
     @Override
     public String wire$nextChannel(String current, boolean forward) {
-        List<String> ch = TypewriterChannels.CHANNELS;
+        List<String> ch = TypewriterChannels.channelsForCurrentKeyboardLayout();
         int idx = ch.indexOf(current);
         if (idx == -1) return ch.getFirst();
         return ch.get(Math.floorMod(idx + (forward ? 1 : -1), ch.size()));
