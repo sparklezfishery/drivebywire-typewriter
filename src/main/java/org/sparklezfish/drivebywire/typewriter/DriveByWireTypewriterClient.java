@@ -100,19 +100,17 @@ public class DriveByWireTypewriterClient {
     }
 
     private static void onKeyInput(InputEvent.Key event) {
-        if (event.getAction() == GLFW.GLFW_REPEAT) return;
-
         var mc = Minecraft.getInstance();
         var player = mc.player;
         if (player == null || mc.level == null) return;
-
+        
         var typewriterPos = ((PlayerTypewriterExtension) player).simulated$getCurrentTypewriter();
         if (typewriterPos == null) return;
 
         var be = mc.level.getBlockEntity(typewriterPos);
         if (!(be instanceof TypewriterHubBlockEntity hub)) return;
         if (!((LinkedTypewriterBlockEntity) hub).powered) return;
-
+        
         String channel;
         if (event.getAction() == GLFW.GLFW_PRESS) {
             channel = TypewriterChannels.resolve(
@@ -131,6 +129,7 @@ public class DriveByWireTypewriterClient {
         if (channel == null) return;
 
         suppressMatchingKeyMappings(mc, event.getKey(), event.getScanCode());
+        if (event.getAction() == GLFW.GLFW_REPEAT) return;
 
         // Track held keys so the tick handler can release them on disconnect/focus-loss
         if (event.getAction() == GLFW.GLFW_PRESS) {
