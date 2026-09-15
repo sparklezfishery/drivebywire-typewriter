@@ -1,4 +1,11 @@
 {
+  "gui.drivebywiretypewriter.quick_selection_tip": "Hold %s to open the quick-selection keyboard.",
+  "gui.drivebywiretypewriter.quick_selection_unbound": "Bind Select wire channel in Controls to use the quick-selection keyboard.",
+  "drivebywiretypewriter.configuration.channelSelectionHoldMs": "Channel selection hold time (ms)",
+  "drivebywiretypewriter.configuration.channelSelectionHoldMs.tooltip": "How long to hold the key before the keyboard overlay opens. Default: 300 ms (0.3 seconds). Set to 0 to open immediately.",
+  "key.drivebywiretypewriter.select_channel": "Select wire channel",
+  "gui.drivebywiretypewriter.channel_title": "Select a wire channel",
+  "gui.drivebywiretypewriter.channel_hint": "Hover a key and release %s to select. Esc cancels.",
   "block.drivebywiretypewriter.typewriter_hub": "Typewriter Hub",
   "itemGroup.drivebywiretypewriter": "Drive By Wire Typewriter",
   "drivebywiretypewriter.key.a": "A",

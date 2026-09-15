@@ -150,3 +150,23 @@ idea {
 tasks.named('wrapper', Wrapper).configure {
     distributionType = Wrapper.DistributionType.BIN
 }
+
+sourceSets {
+    regressionTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+tasks.register('holdToOpenTest', JavaExec) {
+    dependsOn tasks.named('regressionTestClasses')
+    classpath = sourceSets.regressionTest.runtimeClasspath
+    mainClass = 'org.sparklezfish.drivebywire.typewriter.HoldToOpenTest'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.named('check').configure {
+    dependsOn tasks.named('holdToOpenTest')
+}

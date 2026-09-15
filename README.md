@@ -42,6 +42,25 @@ Each channel is active (`1`) while the key is held and inactive (`0`) when relea
 3. Right-click the hub with an empty hand — your keypresses now drive the network.
 4. Right-click again to disconnect.
 
+### Select a wire channel
+
+1. Hold a wire and right-click a Typewriter Hub to select it as the source.
+2. Hold **Left Alt** for 0.3 seconds to open a semi-transparent keyboard overlay.
+3. Move the mouse over a key, then release Alt to select that wire channel.
+4. Right-click the destination to connect it using the selected channel.
+
+Selecting a hub as the wire source shows a tip above the hotbar with your current
+quick-selection shortcut alongside the selected channel.
+
+Rebind **Select wire channel** in Minecraft's **Options → Controls → Key Binds**.
+Open **Mods → Drive By Wire - Typewriter → Config** and adjust
+**Channel selection hold time (ms)** (default: `300`; range: `0`–`5000`; `0` opens immediately).
+Save with **Done**; the new delay applies without restarting the game.
+The overlay uses the active keyboard layout, including supported Hungarian characters.
+The current channel is highlighted in green; the hovered key is highlighted in blue.
+Release outside a key or press Escape to cancel. The overlay is available while wiring,
+and does not open during hub typing. Mouse-wheel selection remains available.
+
 ![Wire Connect](./docs/wire.png)
 ![Turn A](./docs/turnA.png)
 ![Turn D](./docs/turnD.png)
