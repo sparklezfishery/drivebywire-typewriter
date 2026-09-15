@@ -14,6 +14,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
@@ -32,11 +34,15 @@ public class DriveByWireTypewriterClient {
     private static boolean wasConnected = false;
 
     public DriveByWireTypewriterClient(ModContainer container) {
+        container.registerConfig(net.neoforged.fml.config.ModConfig.Type.CLIENT, TypewriterClientConfig.SPEC);
+        container.registerExtensionPoint(IConfigScreenFactory.class, (IConfigScreenFactory) ConfigurationScreen::new);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, DriveByWireTypewriterClient::onKeyInput);
         NeoForge.EVENT_BUS.addListener(DriveByWireTypewriterClient::onClientTick);
+        NeoForge.EVENT_BUS.addListener(ChannelSelectionHandler::onClientTick);
         var modBus = container.getEventBus();
         if (modBus != null) {
             modBus.addListener(DriveByWireTypewriterClient::registerRenderers);
+            modBus.addListener(ChannelSelectionHandler::registerKeyMappings);
         }
     }
 

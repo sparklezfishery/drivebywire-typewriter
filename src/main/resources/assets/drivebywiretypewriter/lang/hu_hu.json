@@ -1,4 +1,11 @@
 {
+  "gui.drivebywiretypewriter.quick_selection_tip": "Tartsd nyomva: %s a gyorsválasztó billentyűzet megnyitásához.",
+  "gui.drivebywiretypewriter.quick_selection_unbound": "Rendelj billentyűt a Vezetékcsatorna kiválasztása művelethez a vezérlés beállításaiban a gyorsválasztó billentyűzet használatához.",
+  "drivebywiretypewriter.configuration.channelSelectionHoldMs": "Csatornaválasztás nyomva tartási ideje (ms)",
+  "drivebywiretypewriter.configuration.channelSelectionHoldMs.tooltip": "Ennyi ideig kell nyomva tartani a billentyűt a billentyűzetpanel megnyitásához. Alapérték: 300 ms (0,3 másodperc). A 0 azonnali megnyitást jelent.",
+  "key.drivebywiretypewriter.select_channel": "Vezetékcsatorna kiválasztása",
+  "gui.drivebywiretypewriter.channel_title": "Válassz vezetékcsatornát",
+  "gui.drivebywiretypewriter.channel_hint": "Mutass egy billentyűre, majd engedd fel: %s. Esc: mégse.",
   "block.drivebywiretypewriter.typewriter_hub": "Írógépközpont",
   "itemGroup.drivebywiretypewriter": "Drive By Wire írógép",
   "drivebywiretypewriter.key.a": "A",
